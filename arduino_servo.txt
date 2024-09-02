@@ -1,0 +1,73 @@
+#define TRIG 9 // 초음파 송신 핀
+#define ECHO 8 // 초음파 수신 핀
+#define SERVO_PIN 7
+#include <Servo.h>
+Servo servo;
+
+long p_Distance = 0; // 이전 거리 데이터를 저장할 변수
+long c_Distance = 0;  // 현재 거리 데이터를 저장할 변수
+int i =0 ; // for 반복문을 위한 변수
+int new_angle = 0; // 굽힘 이후에 새로운 각도 
+
+void setup() {
+  Serial.begin(9600); // 시리얼 모니터 초기화
+  pinMode(TRIG, OUTPUT); // TRIG 핀을 출력으로 설정
+  pinMode(ECHO, INPUT);  // ECHO 핀을 입력으로 설정
+  servo.attach(SERVO_PIN);
+}
+
+void loop() {
+  // 거리 측정을 시작하기 전에 TRIG 핀을 LOW로 설정
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+
+  // TRIG 핀을 HIGH로 설정하여 초음파 신호 송출
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  // ECHO 핀에서 초음파의 반사 시간을 측정
+  long duration = pulseIn(ECHO, HIGH);
+  
+  // 거리 계산 (센서와 물체 사이의 거리)
+  c_Distance = duration * 0.0344 / 2; // 거리 = 시간 * 음속 / 2
+
+  // 시리얼 모니터에 현재 거리와 이전 거리를 출력
+  Serial.print("Current Distance: ");
+  Serial.print(c_Distance);
+  Serial.print(" cm, Previous Distance: ");
+  Serial.println(p_Distance);
+
+  long gap = c_Distance - p_Distance;
+  Serial.println(gap);
+
+  // 1cm의 차이는 14.5 degree 차이
+  float angle = abs(gap) * 14.5;
+  
+  if(p_Distance <= 50){
+    // 숙여야 할 타이밍 -> gap<0
+    if(p_Distance > c_Distance){
+      for(i = 0; i<=angle; i++){
+        new_angle = i;
+        servo.write(i);
+        delay(20);
+      }
+          // 일어나야 할 타이밍
+      if(p_Distance < c_Distance){
+        for(i = new_angle ; i>0; i--){
+          new_angle = i;
+          servo.write(i);
+          delay(20); // 주행 속도에 따른 변화량 크기 계산 필요
+        }
+      }
+    }
+  }
+  // 현재 거리를 이전 거리로 업데이트
+  p_Distance = c_Distance;
+
+  //자이로로이한 좌우 밸런스 
+  //자이로 변화량에 따른 각도 계산
+
+
+  delay(100);
+}
