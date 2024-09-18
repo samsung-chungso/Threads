@@ -1,0 +1,8 @@
+1. sd 카드에 우분투 버젼을 다운(라즈베리파이 os로도 가능)
+2. 우분투 서버버전을 다운 받았으면 sudo apt-get update ->sudo apt-get upgrade ->sudo apt-get ubuntu-desktop 설치
+ 데스크탑 버전이면 sudo apt-get update ->sudo apt-get upgrade
+3. https://dexterexplains.com/r/20211030-how-to-install-raspi-config-on-ubuntu 사이트 들어가서 raspi-config 설치
+4. vnc server 다운하기(https://www.realvnc.com/en/connect/download/vnc/?lai_sr=0-4&lai_sl=l)(deb 파일 설치방법은https://velog.io/@taeha7b/deb )
+5.
+
+
