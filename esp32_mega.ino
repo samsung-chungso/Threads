@@ -1,39 +1,29 @@
-  #include "BluetoothSerial.h"  // BluetoothSerial 라이브러리 포함
+#include "BluetoothSerial.h"
 
-BluetoothSerial SerialBT;     // BluetoothSerial 객체 생성
-char incomingChar;
+// UART1 사용 설정 (핀 16: RX, 핀 17: TX)
+
+BluetoothSerial SerialBT;  // BluetoothSerial 객체 생성
+
 void setup() {
-  Serial.begin(115200);       // ESP32의 시리얼 모니터 설정
-  SerialBT.begin("ESP32_BT"); // 블루투스 장치 이름 설정 (ESP32_BT로 설정)
+  Serial.begin(115200);            // ESP32 시리얼 모니터용
+  Serial1.begin(9600, SERIAL_8N1, 16, 17);  // UART1 설정 (Mega와 통신)
+  SerialBT.begin("ESP32_BT");      // 블루투스 장치 이름 설정
   Serial.println("Bluetooth device is ready to pair");
 }
 
 void loop() {
-  // 핸드폰에서 블루투스로 데이터를 수신하면 처리
-  if (SerialBT.available()>0) {
-    incomingChar = SerialBT.read();  // 블루투스로 받은 데이터 읽기
-    Serial.print("Received: ");
-    Serial.println(incomingChar);         // 수신한 데이터 시리얼 모니터에 출력
-
-    // 여기서 받은 데이터를 기반으로 원하는 동작 수행 (예: 모터 제어, LED 켜기 등)
-    // 예시: 만약 'F'를 받으면 앞으로 전진
-    if (incomingChar == 'a') {
-      Serial.println("Moving forward");
-      // 여기에 전진 코드 추가
-    }
-    // 'B'를 받으면 후진
-    else if (incomingChar == '0') {
-      Serial.println("stop");
-      // 여기에 후진 코드 추가
-    }
+  // 블루투스에서 데이터를 수신하면 Mega로 전송
+  if (SerialBT.available()) {
+    char incomingChar = SerialBT.read();
+    Serial1.write(incomingChar);   // Mega로 데이터 전송
+    Serial.print("Sent to Mega: ");
+    Serial.println(incomingChar);  // 시리얼 모니터에 전송된 데이터 출력
   }
-    // if (incomingChar == 'a') {
-    //   Serial.println("Moving forward");
-    //   // 여기에 전진 코드 추가
-    // }
-    // // 'B'를 받으면 후진
-    // else if (incomingChar == '0') {
-    //   Serial.println("stop");
-    //   // 여기에 후진 코드 추가
-    // }
+
+  // Mega로부터 데이터를 수신하면 시리얼 모니터에 출력
+  if (Serial1.available()) {
+    char incomingChar = Serial1.read();
+    Serial.print("Received from Mega: ");
+    Serial.println(incomingChar);  // Mega에서 받은 데이터 출력
+  }
 }
